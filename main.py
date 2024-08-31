@@ -3,11 +3,12 @@ import joblib
 from pydantic import BaseModel
 
 app = FastAPI()
+
 @app.get("/")
 def root():
     return "Welcome To Tuwaiq Academy"
 
-
+# Load the model and scaler
 model = joblib.load("kmeans_model.joblib")
 scaler = joblib.load("scaler_modell.joblib")
 
@@ -24,17 +25,17 @@ def preprocessing(input_features: InputFeatures):
         'award': input_features.award,
         'height': input_features.height,
     }
-     
-    features_list = [dict_f[key] for key in sorted(dict_f)]
     
-    scaled_features = scaler.transform([list(dict_f.values
- ())])
-
+    
+    scaled_features = scaler.transform([list(dict_f.values())])
     return scaled_features
 
 @app.post("/predict")
 async def predict(input_features: InputFeatures):
+    
     data = preprocessing(input_features)
+  
     y_pred = model.predict(data)
-    return {"pred": y_pred.tolist()[0]}
+
+    return {"cluster": y_pred.tolist()[0]}
 
